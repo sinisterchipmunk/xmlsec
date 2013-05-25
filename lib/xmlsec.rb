@@ -7,22 +7,22 @@ class Nokogiri::XML::Document
   #
   # Examples:
   #
-  #     doc.sign! rsa: 'rsa-private-key'
-  #     doc.sign! rsa: 'rsa-private-key', name: 'key-name'
-  #     doc.sign! x509: 'x509 certificate', rsa: 'cert private key'
-  #     doc.sign! x509: 'x509 certificate', rsa: 'cert private key',
+  #     doc.sign! key: 'rsa-private-key'
+  #     doc.sign! key: 'rsa-private-key', name: 'key-name'
+  #     doc.sign! x509: 'x509 certificate', key: 'cert private key'
+  #     doc.sign! x509: 'x509 certificate', key: 'cert private key',
   #               name: 'key-name'
   #
   # You can also use `:cert` or `:certificate` as aliases for `:x509`.
   #
   def sign! opts
     if (cert = opts[:x509]) || (cert = opts[:cert]) || (cert = opts[:certificate])
-      raise "need a private :rsa key" unless opts[:rsa]
-      _sign_x509 opts[:name].to_s, opts[:rsa], cert
-    elsif opts[:rsa]
-      _sign_rsa opts[:name].to_s, opts[:rsa]
+      raise "need a private :key" unless opts[:key]
+      _sign_x509 opts[:name].to_s, opts[:key], cert
+    elsif opts[:key]
+      _sign_rsa opts[:name].to_s, opts[:key]
     else
-      raise "No signing key"
+      raise "No private :key was given"
     end
     self
   end
@@ -34,7 +34,7 @@ class Nokogiri::XML::Document
   # Examples:
   #
   #     # Try to validate with the given public or private key
-  #     doc.verify_with rsa: 'rsa-key'
+  #     doc.verify_with key: 'rsa-key'
   #
   #     # Try to validate with a set of keys. It will try to match
   #     # based on the contents of the `KeyName` element.
@@ -61,8 +61,8 @@ class Nokogiri::XML::Document
        (certs = opts_or_keys[:certificates])
       certs = [certs] unless certs.kind_of?(Array)
       verify_with_certificates certs
-    elsif opts_or_keys[:rsa]
-      verify_with_rsa_key opts_or_keys[:rsa]
+    elsif opts_or_keys[:key]
+      verify_with_rsa_key opts_or_keys[:key]
     else
       verify_with_named_keys opts_or_keys
     end

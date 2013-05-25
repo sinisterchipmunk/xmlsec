@@ -6,7 +6,7 @@ describe Nokogiri::XML::Document do
   end
 
   describe 'signing a document with an RSA key' do
-    before { subject.sign! rsa: fixture('rsa.pem'), name: 'test' }
+    before { subject.sign! key: fixture('rsa.pem'), name: 'test' }
 
     it 'should produce a signed document' do
       subject.to_s.should == fixture('sign2-result.xml')
@@ -14,7 +14,7 @@ describe Nokogiri::XML::Document do
 
     describe 'verifying the document with a single public key' do
       it 'should be valid' do
-        subject.verify_with(rsa: fixture('rsa.pub')).should == true
+        subject.verify_with(key: fixture('rsa.pub')).should == true
       end
     end
 
@@ -29,7 +29,7 @@ describe Nokogiri::XML::Document do
 
   describe 'signing a document with an RSA key and X509 certificate' do
     before do
-      subject.sign! rsa: fixture('cert/server.key.decrypted'),
+      subject.sign! key: fixture('cert/server.key.decrypted'),
                     name: 'test',
                     x509: fixture('cert/server.crt')
     end
