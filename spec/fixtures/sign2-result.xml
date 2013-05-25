@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Envelope xmlns="urn:envelope">
+  <Data>
+  Hello, World!
+  </Data>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+<SignedInfo>
+<CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+<Reference>
+<Transforms>
+<Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+</Transforms>
+<DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+<DigestValue>Te51eBcV78RHrLH5Dv0P24r8vW8=</DigestValue>
+</Reference>
+</SignedInfo>
+<SignatureValue>DPwu/iB8Sx21tywM69YUztjuMbKdAsfwOniDWlabk2jmEgbtwPlKFgZ9A5wdZbFj
+D+SGQrv0y0d0UV8SBV5zeAeyyX7uwpm45iEbtQjirC6oaJ5Eu9caBCRqbcxNSTdR
+yKGnO1r+dK/9T/MFANce39wBaeOUzo2qJe2128iWal4=</SignatureValue>
+<KeyInfo>
+<KeyName>test</KeyName>
+</KeyInfo>
+</Signature></Envelope>
