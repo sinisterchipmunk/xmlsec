@@ -3,7 +3,7 @@ require 'rake/extensiontask'
 require 'rspec/core/rake_task'
 
 Rake::ExtensionTask.new('xmlsecrb') do |t|
-  t.lib_dir = 'lib/ext'
+  t.lib_dir = 'lib/ext/xmlsecrb'
 end
 
 RSpec::Core::RakeTask.new :rspec
