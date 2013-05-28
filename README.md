@@ -1,4 +1,4 @@
-# xmlsec
+# nokogiri-xmlsec
 
 Adds support to Ruby for encrypting, decrypting, signing and validating
 the signatures of XML documents, according to the [XML Encryption Syntax and
@@ -10,7 +10,7 @@ to `Nokogiri::XML::Document`.
 
 Add this line to your application's Gemfile:
 
-    gem 'xmlsec'
+    gem 'nokogiri-xmlsec'
 
 And then execute:
 
@@ -18,7 +18,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install xmlsec
+    $ gem install nokogiri-xmlsec
 
 ## Usage
 
@@ -110,7 +110,7 @@ immediate plan to resolve. This is probably because I haven't needed the
 functionality, and no one has sent a pull request. (Hint, hint!)
 
 - Currently, it is not possible to operate on individual XML nodes. The
-  `xmlsec` operations must be performed on the entire document.
+  `nokogiri-xmlsec` operations must be performed on the entire document.
 
 ## Contributing
 
