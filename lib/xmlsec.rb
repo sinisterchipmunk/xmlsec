@@ -80,8 +80,8 @@ class Nokogiri::XML::Document
   #
   # Examples:
   # 
-  #     # encrypt with a private key and optional key name
-  #     doc.encrypt! key: 'private-key', name: 'name'
+  #     # encrypt with a public key and optional key name
+  #     doc.encrypt! key: 'public-key', name: 'name'
   #
   def encrypt! opts
     if opts[:key]
@@ -96,8 +96,8 @@ class Nokogiri::XML::Document
   #
   # Examples:
   #
-  #     # decrypt with a specific public or private key
-  #     doc.decrypt! key: 'rsa-key'
+  #     # decrypt with a specific private key
+  #     doc.decrypt! key: 'private-key'
   #
   def decrypt! opts
     if opts[:key]
