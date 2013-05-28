@@ -157,12 +157,17 @@ VALUE encrypt_with_key(VALUE self, VALUE rb_key_name, VALUE rb_key) {
   
   // the template is inserted in the doc, so don't free it
   encDataNode = NULL;
+  encKeyNode = NULL;
 
 done:
 
   /* cleanup */
   if(encCtx != NULL) {
     xmlSecEncCtxDestroy(encCtx);
+  }
+
+  if (encKeyNode != NULL) {
+    xmlFreeNode(encKeyNode);
   }
 
   if(encDataNode != NULL) {
