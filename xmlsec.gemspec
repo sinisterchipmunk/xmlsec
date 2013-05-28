@@ -6,10 +6,10 @@ require 'xmlsec/version'
 Gem::Specification.new do |spec|
   spec.name          = "xmlsec"
   spec.version       = Xmlsec::VERSION
-  spec.authors       = ["TODO: Write your name"]
+  spec.authors       = ["Colin MacKenzie IV"]
   spec.email         = ["sinisterchipmunk@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Wrapper around http://www.aleksey.com/xmlsec to support XML encryption, decryption, signing and signature validation in Ruby}
+  spec.summary       = %q{Wrapper around http://www.aleksey.com/xmlsec to support XML encryption, decryption, signing and signature validation in Ruby}
   spec.homepage      = ""
   spec.license       = "MIT"
 
