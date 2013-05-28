@@ -18,9 +18,9 @@ class Nokogiri::XML::Document
   def sign! opts
     if (cert = opts[:x509]) || (cert = opts[:cert]) || (cert = opts[:certificate])
       raise "need a private :key" unless opts[:key]
-      _sign_x509 opts[:name].to_s, opts[:key], cert
+      sign_with_certificate opts[:name].to_s, opts[:key], cert
     elsif opts[:key]
-      _sign_rsa opts[:name].to_s, opts[:key]
+      sign_with_key opts[:name].to_s, opts[:key]
     else
       raise "No private :key was given"
     end
@@ -74,5 +74,37 @@ class Nokogiri::XML::Document
   #
   def verify_signature
     verify_with_certificates []
+  end
+
+  # Encrypts the current document, then returns it.
+  #
+  # Examples:
+  # 
+  #     # encrypt with a private key and optional key name
+  #     doc.encrypt! key: 'private-key', name: 'name'
+  #
+  def encrypt! opts
+    if opts[:key]
+      encrypt_with_key opts[:name].to_s, opts[:key]
+    else
+      raise "private :key is required for encryption"
+    end
+    self
+  end
+
+  # Decrypts the current document, then returns it.
+  #
+  # Examples:
+  #
+  #     # decrypt with a specific public or private key
+  #     doc.decrypt! key: 'rsa-key'
+  #
+  def decrypt! opts
+    if opts[:key]
+      decrypt_with_key opts[:name].to_s, opts[:key]
+    else
+      raise 'inadequate options specified for decryption'
+    end
+    self
   end
 end

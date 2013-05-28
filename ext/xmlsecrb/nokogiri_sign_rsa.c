@@ -3,7 +3,7 @@
 // TODO the signature context probably should be a ruby instance variable
 // and separate object, instead of being allocated/freed in each method.
 
-VALUE sign_rsa(VALUE self, VALUE rb_key_name, VALUE rb_rsa_key) {
+VALUE sign_with_key(VALUE self, VALUE rb_key_name, VALUE rb_rsa_key) {
   xmlDocPtr doc;
   xmlNodePtr signNode = NULL;
   xmlNodePtr refNode = NULL;

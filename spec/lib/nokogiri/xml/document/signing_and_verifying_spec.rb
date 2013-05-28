@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Nokogiri::XML::Document do
+describe "signing and verifying signatures:" do
   subject do
     Nokogiri::XML(fixture('sign2-doc.xml'))
   end
