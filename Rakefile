@@ -2,9 +2,7 @@ require "bundler/gem_tasks"
 require 'rake/extensiontask'
 require 'rspec/core/rake_task'
 
-Rake::ExtensionTask.new('xmlsecrb') do |t|
-  t.lib_dir = 'lib/ext/xmlsecrb'
-end
+Rake::ExtensionTask.new('nokogiri_ext_xmlsec')
 
 RSpec::Core::RakeTask.new :rspec
 

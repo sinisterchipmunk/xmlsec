@@ -1,6 +1,6 @@
 #include "xmlsecrb.h"
 
-xmlSecKeysMngrPtr getKeyManager(char* keyStr, unsigned int keyLength, char *keyName) {
+static xmlSecKeysMngrPtr getKeyManager(char* keyStr, unsigned int keyLength, char *keyName) {
   xmlSecKeysMngrPtr mngr;
   xmlSecKeyPtr key;
   

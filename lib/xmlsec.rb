@@ -1,6 +1,6 @@
 require "xmlsec/version"
 require 'nokogiri'
-require 'ext/xmlsecrb/xmlsecrb'
+require 'nokogiri_ext_xmlsec'
 
 class Nokogiri::XML::Document
   # Signs this document, and then returns it.

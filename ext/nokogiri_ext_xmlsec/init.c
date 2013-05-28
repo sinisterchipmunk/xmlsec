@@ -1,6 +1,6 @@
 #include "xmlsecrb.h"
 
-void Init_xmlsecrb() {
+void Init_nokogiri_ext_xmlsec() {
   /* xmlsec proper */
   // libxml
   xmlInitParser();
