@@ -87,7 +87,7 @@ class Nokogiri::XML::Document
     if opts[:key]
       encrypt_with_key opts[:name].to_s, opts[:key]
     else
-      raise "private :key is required for encryption"
+      raise "public :key is required for encryption"
     end
     self
   end
