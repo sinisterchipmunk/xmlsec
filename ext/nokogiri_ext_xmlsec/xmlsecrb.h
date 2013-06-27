@@ -25,6 +25,7 @@ VALUE verify_signature_with_named_keys(VALUE self, VALUE rb_keys);
 VALUE verify_signature_with_certificates(VALUE self, VALUE rb_certs);
 VALUE encrypt_with_key(VALUE self, VALUE rb_key_name, VALUE rb_key);
 VALUE decrypt_with_key(VALUE self, VALUE rb_key_name, VALUE rb_key);
+VALUE set_id_attribute(VALUE self, VALUE rb_attr_name);
 
 void Init_Nokogiri_ext(void);
 

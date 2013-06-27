@@ -75,7 +75,7 @@ VALUE verify_signature_with_certificates(VALUE self, VALUE rb_certs) {
 
   // verify signature
   if(xmlSecDSigCtxVerify(dsigCtx, node) < 0) {
-    rb_raise(rb_eVerificationError, "signature could not be verified");
+    rb_raise(rb_eVerificationError, "error occurred during signature verification");
     goto done;
   }
       
