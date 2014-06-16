@@ -9,20 +9,20 @@ describe "signing and verifying signatures:" do
     before { subject.sign! key: fixture('rsa.pem'), name: 'test' }
 
     it 'should produce a signed document' do
-      subject.to_s.should == fixture('sign2-result.xml')
+      expect(subject.to_s).to eq(fixture('sign2-result.xml'))
     end
 
     describe 'verifying the document with a single public key' do
       it 'should be valid' do
-        subject.verify_with(key: fixture('rsa.pub')).should == true
+        expect(subject.verify_with(key: fixture('rsa.pub'))).to eq(true)
       end
     end
 
     describe 'verifying the document with a set of keys' do
       it 'should be valid' do
-        subject.verify_with({
+        expect(subject.verify_with({
           'test' => fixture('rsa.pub')
-        }).should == true
+        })).to eq(true)
       end
     end
   end
@@ -35,13 +35,13 @@ describe "signing and verifying signatures:" do
     end
 
     it 'should produce a signed document' do
-      subject.to_s.should == fixture('sign3-result.xml')
+      expect(subject.to_s).to eq fixture('sign3-result.xml')
     end
 
     describe 'verifying the document with an array of X509 certificates' do
-      specify { subject.verify_with(x509: [fixture('cert/server.crt')]).should == true }
-      specify { subject.verify_with(certs: [fixture('cert/server.crt')]).should == true }
-      specify { subject.verify_with(certificates: [fixture('cert/server.crt')]).should == true }
+      specify { expect(subject.verify_with(x509: [fixture('cert/server.crt')])).to eq(true) }
+      specify { expect(subject.verify_with(certs: [fixture('cert/server.crt')])).to eq(true) }
+      specify { expect(subject.verify_with(certificates: [fixture('cert/server.crt')])).to eq(true) }
 
       it 'should verify using system certificates' do
         # subject.verify_signature.should == true -- sort of.
@@ -61,9 +61,9 @@ describe "signing and verifying signatures:" do
     end
 
     describe 'verifying the document with one X509 certificate' do
-      specify { subject.verify_with(x509: fixture('cert/server.crt')).should == true }
-      specify { subject.verify_with(cert: fixture('cert/server.crt')).should == true }
-      specify { subject.verify_with(certificate: fixture('cert/server.crt')).should == true }
+      specify { expect(subject.verify_with(x509: fixture('cert/server.crt'))).to eq(true) }
+      specify { expect(subject.verify_with(cert: fixture('cert/server.crt'))).to eq(true) }
+      specify { expect(subject.verify_with(certificate: fixture('cert/server.crt'))).to eq(true) }
     end
   end
 
