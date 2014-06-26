@@ -235,7 +235,7 @@ end
 
 case
 when arg_config('--use-system-libraries', !!ENV['NOKOGIRI_USE_SYSTEM_LIBRARIES'])
-  message! "Building nokogiri using system libraries.\n"
+  message! "Building nokogiri-xmlsec using system libraries.\n"
 
   dir_config('zlib')
 
