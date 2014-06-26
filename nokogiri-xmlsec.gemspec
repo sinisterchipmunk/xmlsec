@@ -25,12 +25,13 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
   spec.extensions = %w{ext/nokogiri_ext_xmlsec/extconf.rb}
 
-  spec.add_dependency 'nokogiri'
+  spec.add_dependency "nokogiri"
+  spec.add_dependency "mini_portile", "0.6.0"
   
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rake-compiler"
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "guard-rspec"
-  spec.add_development_dependency "guard-rake"
+  spec.add_development_dependency 'guard-rake'
 end
