@@ -234,7 +234,7 @@ if RbConfig::MAKEFILE_CONFIG['CC'] =~ /gcc/
 end
 
 case
-when arg_config('--use-system-libraries', !!ENV['NOKOGIRI_USE_SYSTEM_LIBRARIES'])
+when arg_config('--use-system-libraries', !!ENV['NOKOGIRI_XMLSEC_USE_SYSTEM_LIBRARIES'])
   message! "Building nokogiri-xmlsec using system libraries.\n"
 
   dir_config('zlib')
