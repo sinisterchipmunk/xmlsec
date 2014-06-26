@@ -22,9 +22,6 @@ def do_help
   print <<HELP
 usage: ruby #{$0} [options]
 
-    --disable-clean
-        Do not clean out intermediate files after successful build.
-
     --disable-static
         Do not statically link bundled libraries.
 
