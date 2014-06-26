@@ -51,28 +51,6 @@ HELP
 end
 
 def do_clean
-  require 'pathname'
-  require 'fileutils'
-
-  root = Pathname(ROOT)
-  pwd  = Pathname(Dir.pwd)
-
-  # Skip if this is a development work tree
-  unless (root + '.git').exist?
-    message "Cleaning files only used during build.\n"
-
-    # (root + 'tmp') cannot be removed at this stage because
-    # nokogiri_ext_xmlsec.so is yet to be copied to lib.
-
-    # clean the ports build directory
-    Pathname.glob(pwd.join('tmp', '*', 'ports')) { |dir|
-      FileUtils.rm_rf(dir, verbose: true)
-      FileUtils.rmdir(dir.parent, parents: true, verbose: true)
-    }
-
-    FileUtils.rm_rf(root + 'ports' + 'archives', verbose: true)
-  end
-
   exit! 0
 end
 
