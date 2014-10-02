@@ -1,88 +1,41 @@
 #include "xmlsecrb.h"
-
-static xmlSecKeysMngrPtr getKeyManager(char* keyStr, unsigned int keyLength, char *keyName) {
-  xmlSecKeysMngrPtr mngr;
-  xmlSecKeyPtr key;
-  
-  /* create and initialize keys manager, we use a simple list based
-   * keys manager, implement your own xmlSecKeysStore klass if you need
-   * something more sophisticated 
-   */
-  mngr = xmlSecKeysMngrCreate();
-  if(mngr == NULL) {
-    rb_raise(rb_eDecryptionError, "failed to create keys manager.");
-    return(NULL);
-  }
-  if(xmlSecCryptoAppDefaultKeysMngrInit(mngr) < 0) {
-    rb_raise(rb_eDecryptionError, "failed to initialize keys manager.");
-    xmlSecKeysMngrDestroy(mngr);
-    return(NULL);
-  }    
-  
-  /* load private RSA key */
-  // key = xmlSecCryptoAppKeyLoad(key_file, xmlSecKeyDataFormatPem, NULL, NULL, NULL);
-  key = xmlSecCryptoAppKeyLoadMemory((xmlSecByte *)keyStr,
-                                     keyLength,
-                                     xmlSecKeyDataFormatPem,
-                                     NULL, // password
-                                     NULL, NULL);
-  if(key == NULL) {
-    rb_raise(rb_eDecryptionError, "failed to load rsa key");
-    xmlSecKeysMngrDestroy(mngr);
-    return(NULL);
-  }
-
-  /* set key name to the file name, this is just an example! */
-  if(xmlSecKeySetName(key, BAD_CAST keyName) < 0) {
-    rb_raise(rb_eDecryptionError, "failed to set key name");
-    xmlSecKeyDestroy(key);  
-    xmlSecKeysMngrDestroy(mngr);
-    return(NULL);
-  }
-      
-  /* add key to keys manager, from now on keys manager is responsible 
-   * for destroying key 
-   */
-  if(xmlSecCryptoAppDefaultKeysMngrAdoptKey(mngr, key) < 0) {
-    rb_raise(rb_eDecryptionError, "failed to add key to keys manager");
-    xmlSecKeyDestroy(key);
-    xmlSecKeysMngrDestroy(mngr);
-    return(NULL);
-  }
-
-  return(mngr);
-}
+#include "util.h"
 
 VALUE encrypt_with_key(VALUE self, VALUE rb_key_name, VALUE rb_key) {
-  xmlDocPtr doc;
+  VALUE rb_exception_result = Qnil;
+  const char* exception_message = NULL;
+
+  xmlDocPtr doc = NULL;
   xmlNodePtr encDataNode = NULL;
   xmlNodePtr encKeyNode  = NULL;
   xmlNodePtr keyInfoNode = NULL;
   xmlSecEncCtxPtr encCtx = NULL;
   xmlSecKeysMngrPtr keyManager = NULL;
-  char *keyName;
-  char *key;
-  unsigned int keyLength;
+  char *keyName = NULL;
+  char *key = NULL;
+  unsigned int keyLength = 0;
 
-  Check_Type(rb_key_name, T_STRING);
   Check_Type(rb_key,      T_STRING);
+  Check_Type(rb_key_name, T_STRING);
   Data_Get_Struct(self, xmlDoc, doc);
   key       = RSTRING_PTR(rb_key);
   keyLength = RSTRING_LEN(rb_key);
-  keyName   = RSTRING_PTR(rb_key_name);
+  keyName = strndup(RSTRING_PTR(rb_key_name), RSTRING_LEN(rb_key_name) + 1);
 
   // create encryption template to encrypt XML file and replace 
   // its content with encryption result
   encDataNode = xmlSecTmplEncDataCreate(doc, xmlSecTransformDes3CbcId,
-                              NULL, xmlSecTypeEncElement, NULL, NULL);
+                                        NULL, xmlSecTypeEncElement, NULL, NULL);
   if(encDataNode == NULL) {
-    rb_raise(rb_eEncryptionError, "failed to create encryption template");
+    rb_exception_result = rb_eEncryptionError;
+    exception_message = "failed to create encryption template";
     goto done;
   }
 
   // we want to put encrypted data in the <enc:CipherValue/> node
   if(xmlSecTmplEncDataEnsureCipherValue(encDataNode) == NULL) {
-    rb_raise(rb_eEncryptionError, "failed to add CipherValue node");
+    rb_exception_result = rb_eEncryptionError;
+    exception_message = "failed to add CipherValue node";
     goto done;
   }
 
@@ -90,25 +43,29 @@ VALUE encrypt_with_key(VALUE self, VALUE rb_key_name, VALUE rb_key) {
   // signed document
   keyInfoNode = xmlSecTmplEncDataEnsureKeyInfo(encDataNode, NULL);
   if(keyInfoNode == NULL) {
-    rb_raise(rb_eEncryptionError, "failed to add key info");
+    rb_exception_result = rb_eEncryptionError;
+    exception_message = "failed to add key info";
     goto done;
   }
 
   if(xmlSecTmplKeyInfoAddKeyName(keyInfoNode, NULL) == NULL) {
-    rb_raise(rb_eEncryptionError, "failed to add key name");
+    rb_exception_result = rb_eEncryptionError;
+    exception_message = "failed to add key name";
     goto done;
   }
 
-  keyManager = getKeyManager(key, keyLength, keyName);
+  keyManager = getKeyManager(key, keyLength, keyName, &rb_exception_result,
+                             &exception_message);
   if (keyManager == NULL) {
-    rb_raise(rb_eEncryptionError, "failed to create key manager");
+    // Propagate the exception.
     goto done;
   }
 
   // create encryption context, we don't need keys manager in this example
   encCtx = xmlSecEncCtxCreate(keyManager);
   if(encCtx == NULL) {
-    rb_raise(rb_eEncryptionError, "failed to create encryption context");
+    rb_exception_result = rb_eEncryptionError;
+    exception_message = "failed to create encryption context";
     goto done;
   }
 
@@ -122,13 +79,15 @@ VALUE encrypt_with_key(VALUE self, VALUE rb_key_name, VALUE rb_key) {
   // encCtx->encKey = xmlSecAppCryptoKeyGenerate(xmlSecAppCmdLineParamGetString(&sessionKeyParam),
   //                               NULL, xmlSecKeyDataTypeSession);
   if(encCtx->encKey == NULL) {
-    rb_raise(rb_eDecryptionError, "failed to generate session des key");
+    rb_exception_result = rb_eDecryptionError;
+    exception_message = "failed to generate session des key";
     goto done;
   }
 
   // set key name
   if(xmlSecKeySetName(encCtx->encKey, (xmlSecByte *)keyName) < 0) {
-    rb_raise(rb_eEncryptionError, "failed to set key name to '%s'", keyName);
+    rb_exception_result = rb_eEncryptionError;
+    exception_message = "failed to set key name";
     goto done;
   }
 
@@ -141,17 +100,20 @@ VALUE encrypt_with_key(VALUE self, VALUE rb_key_name, VALUE rb_key) {
                                        NULL  // xmlChar *recipient
                                       );
   if (encKeyNode == NULL) {
-    rb_raise(rb_eEncryptionError, "failed to add encrypted key node");
+    rb_exception_result = rb_eEncryptionError;
+    exception_message = "failed to add encrypted key node";
     goto done;
   }
   if (xmlSecTmplEncDataEnsureCipherValue(encKeyNode) == NULL) {
-    rb_raise(rb_eEncryptionError, "failed to add encrypted cipher value");
+    rb_exception_result = rb_eEncryptionError;
+    exception_message = "failed to add encrypted cipher value";
     goto done;
   }
 
   // encrypt the data
   if(xmlSecEncCtxXmlEncrypt(encCtx, encDataNode, xmlDocGetRootElement(doc)) < 0) {
-    rb_raise(rb_eEncryptionError, "encryption failed");
+    rb_exception_result = rb_eEncryptionError;
+    exception_message = "encryption failed";
     goto done;
   }
   
@@ -178,5 +140,11 @@ done:
     xmlSecKeysMngrDestroy(keyManager);
   }
 
-  return T_NIL;
+  free(keyName);
+
+  if(rb_exception_result != Qnil) {
+    rb_raise(rb_exception_result, "%s", exception_message);
+  }
+
+  return Qnil;
 }

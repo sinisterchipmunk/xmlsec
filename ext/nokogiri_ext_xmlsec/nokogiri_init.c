@@ -1,12 +1,12 @@
 #include "xmlsecrb.h"
 
-VALUE rb_cNokogiri_XML_Document = T_NIL;
-VALUE rb_cNokogiri_XML_Node = T_NIL;
-VALUE rb_eSigningError = T_NIL;
-VALUE rb_eVerificationError = T_NIL;
-VALUE rb_eKeystoreError = T_NIL;
-VALUE rb_eEncryptionError = T_NIL;
-VALUE rb_eDecryptionError = T_NIL;
+VALUE rb_cNokogiri_XML_Document = Qnil;
+VALUE rb_cNokogiri_XML_Node = Qnil;
+VALUE rb_eSigningError = Qnil;
+VALUE rb_eVerificationError = Qnil;
+VALUE rb_eKeystoreError = Qnil;
+VALUE rb_eEncryptionError = Qnil;
+VALUE rb_eDecryptionError = Qnil;
 
 void Init_Nokogiri_ext() {
   VALUE XMLSec = rb_define_module("XMLSec");

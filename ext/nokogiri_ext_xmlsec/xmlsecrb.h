@@ -1,5 +1,5 @@
-#ifndef XMLSECRB_H
-#define XMLSECRB_H
+#ifndef NOKOGIRI_EXT_XMLSEC_XMLSECRB_H
+#define NOKOGIRI_EXT_XMLSEC_XMLSECRB_H
 
 #include <ruby.h>
 
@@ -36,4 +36,4 @@ extern VALUE rb_eKeystoreError;
 extern VALUE rb_eEncryptionError;
 extern VALUE rb_eDecryptionError;
 
-#endif // XMLSECRB_H
+#endif // NOKOGIRI_EXT_XMLSEC_XMLSECRB_H
