@@ -1,112 +1,60 @@
 #include "xmlsecrb.h"
-
-static xmlSecKeysMngrPtr getKeyManager(char* keyStr, unsigned int keyLength, char *keyName) {
-  xmlSecKeysMngrPtr mngr;
-  xmlSecKeyPtr key;
-  
-  /* create and initialize keys manager, we use a simple list based
-   * keys manager, implement your own xmlSecKeysStore klass if you need
-   * something more sophisticated 
-   */
-  mngr = xmlSecKeysMngrCreate();
-  if(mngr == NULL) {
-    rb_raise(rb_eDecryptionError, "failed to create keys manager.");
-    return(NULL);
-  }
-  if(xmlSecCryptoAppDefaultKeysMngrInit(mngr) < 0) {
-    rb_raise(rb_eDecryptionError, "failed to initialize keys manager.");
-    xmlSecKeysMngrDestroy(mngr);
-    return(NULL);
-  }    
-  
-  /* load private RSA key */
-  // key = xmlSecCryptoAppKeyLoad(key_file, xmlSecKeyDataFormatPem, NULL, NULL, NULL);
-  key = xmlSecCryptoAppKeyLoadMemory((xmlSecByte *)keyStr,
-                                     keyLength,
-                                     xmlSecKeyDataFormatPem,
-                                     NULL, // password
-                                     NULL, NULL);
-  if(key == NULL) {
-    rb_raise(rb_eDecryptionError, "failed to load rsa key");
-    xmlSecKeysMngrDestroy(mngr);
-    return(NULL);
-  }
-
-  /* set key name to the file name, this is just an example! */
-  if(xmlSecKeySetName(key, BAD_CAST keyName) < 0) {
-    rb_raise(rb_eDecryptionError, "failed to set key name");
-    xmlSecKeyDestroy(key);  
-    xmlSecKeysMngrDestroy(mngr);
-    return(NULL);
-  }
-
-  /* add key to keys manager, from now on keys manager is responsible 
-   * for destroying key 
-   */
-  if(xmlSecCryptoAppDefaultKeysMngrAdoptKey(mngr, key) < 0) {
-    rb_raise(rb_eDecryptionError, "failed to add key to keys manager");
-    xmlSecKeyDestroy(key);
-    xmlSecKeysMngrDestroy(mngr);
-    return(NULL);
-  }
-
-  return(mngr);
-}
+#include "util.h"
 
 VALUE decrypt_with_key(VALUE self, VALUE rb_key_name, VALUE rb_key) {
-  xmlDocPtr doc;
+  VALUE rb_exception_result = Qnil;
+  const char* exception_message = NULL;
+
+  xmlDocPtr doc = NULL;
   xmlNodePtr node = NULL;
   xmlSecEncCtxPtr encCtx = NULL;
   xmlSecKeysMngrPtr keyManager = NULL;
-  char *key;
-  char *keyName;
-  unsigned int keyLength;
+  char *key = NULL;
+  char *keyName = NULL;
+  unsigned int keyLength = 0;
 
   Check_Type(rb_key,      T_STRING);
   Check_Type(rb_key_name, T_STRING);
   Data_Get_Struct(self, xmlDoc, doc);
   key       = RSTRING_PTR(rb_key);
   keyLength = RSTRING_LEN(rb_key);
-  keyName   = RSTRING_PTR(rb_key_name);
-
+  keyName = strndup(RSTRING_PTR(rb_key_name), RSTRING_LEN(rb_key_name) + 1);
 
   // find start node
   node = xmlSecFindNode(xmlDocGetRootElement(doc), xmlSecNodeEncryptedData, xmlSecEncNs);
   if(node == NULL) {
-      rb_raise(rb_eDecryptionError, "start node not found");
+      rb_exception_result = rb_eDecryptionError;
+      exception_message = "start node not found";
       goto done;      
   }
 
-  keyManager = getKeyManager(key, keyLength, keyName);
+  keyManager = getKeyManager(key, keyLength, keyName, &rb_exception_result,
+                             &exception_message);
   if (keyManager == NULL) {
-    rb_raise(rb_eEncryptionError, "failed to create key manager");
+    // Propagate the exception.
     goto done;
   }
 
   // create encryption context
   encCtx = xmlSecEncCtxCreate(keyManager);
   if(encCtx == NULL) {
-    rb_raise(rb_eDecryptionError, "failed to create encryption context");
+    rb_exception_result = rb_eDecryptionError;
+    exception_message = "failed to create encryption context";
     goto done;
   }
 
   // decrypt the data
   if((xmlSecEncCtxDecrypt(encCtx, node) < 0) || (encCtx->result == NULL)) {
-    rb_raise(rb_eDecryptionError, "decryption failed");
+    rb_exception_result = rb_eDecryptionError;
+    exception_message = "decryption failed";
     goto done;
   }
 
   if(encCtx->resultReplaced == 0) {
-    fprintf(stdout, "Decrypted binary data (%d bytes):", xmlSecBufferGetSize(encCtx->result));
-    if(xmlSecBufferGetData(encCtx->result) != NULL) {
-      fwrite(xmlSecBufferGetData(encCtx->result), 
-             1, 
-             xmlSecBufferGetSize(encCtx->result),
-             stdout);
-      fprintf(stdout, "\n");
-    }
+    rb_warn("Decrypted binary data (%d bytes):", xmlSecBufferGetSize(encCtx->result));
 
-    rb_raise(rb_eDecryptionError, "Not implemented: don't know how to handle decrypted, non-XML data yet");
+    rb_exception_result = rb_eDecryptionError;
+    exception_message =  "Not implemented: don't know how to handle decrypted, non-XML data yet";
     goto done;
   }
 
@@ -120,5 +68,11 @@ done:
     xmlSecKeysMngrDestroy(keyManager);
   }
 
-  return T_NIL;
+  free(keyName);
+
+  if(rb_exception_result != Qnil) {
+    rb_raise(rb_exception_result, "%s", exception_message);
+  }
+
+  return Qnil;
 }
