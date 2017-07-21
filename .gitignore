@@ -17,3 +17,5 @@ test/version_tmp
 tmp
 spec/old
 *.so
+.idea
+*.bundle

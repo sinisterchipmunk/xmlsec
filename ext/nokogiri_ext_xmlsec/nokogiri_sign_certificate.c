@@ -5,6 +5,8 @@ VALUE sign_with_certificate(VALUE self, VALUE rb_key_name, VALUE rb_rsa_key, VAL
   xmlNodePtr signNode = NULL;
   xmlNodePtr refNode = NULL;
   xmlNodePtr keyInfoNode = NULL;
+  xmlNodePtr x509Node = NULL;
+  xmlNodePtr x509SerialNode = NULL;
   xmlSecDSigCtxPtr dsigCtx = NULL;
   char *keyName;
   char *certificate;
@@ -19,8 +21,8 @@ VALUE sign_with_certificate(VALUE self, VALUE rb_key_name, VALUE rb_rsa_key, VAL
   certificateLength = RSTRING_LEN(rb_cert);
 
   // create signature template for RSA-SHA1 enveloped signature
-  signNode = xmlSecTmplSignatureCreate(doc, xmlSecTransformExclC14NId,
-                                         xmlSecTransformRsaSha1Id, NULL);
+  signNode = xmlSecTmplSignatureCreateNsPref(doc, xmlSecTransformInclC14NId,
+                                         xmlSecTransformRsaSha1Id, NULL, "ds");
   if (signNode == NULL) {
     rb_raise(rb_eSigningError, "failed to create signature template");
     goto done;
@@ -31,7 +33,7 @@ VALUE sign_with_certificate(VALUE self, VALUE rb_key_name, VALUE rb_rsa_key, VAL
 
   // add reference
   refNode = xmlSecTmplSignatureAddReference(signNode, xmlSecTransformSha1Id,
-                                        NULL, NULL, NULL);
+                                        NULL, "", NULL);
   if(refNode == NULL) {
     rb_raise(rb_eSigningError, "failed to add reference to signature template");
     goto done;
@@ -43,17 +45,28 @@ VALUE sign_with_certificate(VALUE self, VALUE rb_key_name, VALUE rb_rsa_key, VAL
     goto done;
   }
 
+  // add enveloped transform
+    if(xmlSecTmplReferenceAddTransform(refNode, xmlSecTransformInclC14NId) == NULL) {
+      rb_raise(rb_eSigningError, "failed to add enveloped transform to reference");
+      goto done;
+    }
+
   // add <dsig:KeyInfo/> and <dsig:X509Data/>
   keyInfoNode = xmlSecTmplSignatureEnsureKeyInfo(signNode, NULL);
   if(keyInfoNode == NULL) {
     rb_raise(rb_eSigningError, "failed to add key info");
     goto done;
   }
-  
-  if(xmlSecTmplKeyInfoAddX509Data(keyInfoNode) == NULL) {
+
+  x509Node = xmlSecTmplKeyInfoAddX509Data(keyInfoNode);
+  if( x509Node == NULL) {
     rb_raise(rb_eSigningError, "failed to add X509Data node");
     goto done;
   }
+
+  x509SerialNode = xmlSecTmplX509DataAddIssuerSerial(x509Node);
+  xmlSecTmplX509IssuerSerialAddIssuerName(x509SerialNode, "CN=Gandi Standard SSL CA 2,O=Gandi,L=Paris,ST=Paris,C=FR");
+  xmlSecTmplX509IssuerSerialAddSerialNumber(x509SerialNode, "180768426381044633091722485386902989652");
 
   // create signature context, we don't need keys manager in this example
   dsigCtx = xmlSecDSigCtxCreate(NULL);
