@@ -119,3 +119,6 @@ functionality, and no one has sent a pull request. (Hint, hint!)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+gem build nokogiri-xmlsec.gemspec
+gem install nokogiri-xmlsec-0.0.5.gem

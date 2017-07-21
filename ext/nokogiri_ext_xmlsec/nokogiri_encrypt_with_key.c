@@ -23,7 +23,7 @@ static xmlSecKeysMngrPtr getKeyManager(char* keyStr, unsigned int keyLength, cha
   // key = xmlSecCryptoAppKeyLoad(key_file, xmlSecKeyDataFormatPem, NULL, NULL, NULL);
   key = xmlSecCryptoAppKeyLoadMemory((xmlSecByte *)keyStr,
                                      keyLength,
-                                     xmlSecKeyDataFormatPem,
+                                     xmlSecKeyDataFormatCertPem,
                                      NULL, // password
                                      NULL, NULL);
   if(key == NULL) {
@@ -94,10 +94,10 @@ VALUE encrypt_with_key(VALUE self, VALUE rb_key_name, VALUE rb_key) {
     goto done;
   }
 
-  if(xmlSecTmplKeyInfoAddKeyName(keyInfoNode, NULL) == NULL) {
-    rb_raise(rb_eEncryptionError, "failed to add key name");
-    goto done;
-  }
+//  if(xmlSecTmplKeyInfoAddKeyName(keyInfoNode, NULL) == NULL) {
+//    rb_raise(rb_eEncryptionError, "failed to add key name");
+//    goto done;
+//  }
 
   keyManager = getKeyManager(key, keyLength, keyName);
   if (keyManager == NULL) {
