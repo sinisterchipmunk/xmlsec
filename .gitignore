@@ -10,6 +10,9 @@ coverage
 doc/
 lib/bundler/man
 pkg
+ports/archives
+ports/*-*-*
+ports/*.installed
 rdoc
 spec/reports
 test/tmp
